@@ -367,7 +367,7 @@ details summary::-webkit-details-marker{display:none}
 <script>
 (function () {
   var WHATSAPP = 'https://chat.whatsapp.com/LbNjcRe9jwqGFJjbOVrHRQ';
-  var PLANILHA = 'https://script.google.com/macros/s/AKfycbyMMWC2LWJ2xzuEOoERXkiw4Bc85vjA9WYjRKz7e4FB4wpiNSQMwkox3K2cujvmg6u_7w/exec';
+  var PLANILHA = 'https://script.google.com/macros/s/AKfycbwz4mceDc24uRGySIKjMTHsx3AXmAaGxi6hoZwB6cdw6Ul8MjMkBjm0HwGTllTnzp7DpA/exec';
   var ALVO = new Date('2026-11-27T00:00:00-03:00').getTime();
   var estado = { sent: false, hasError: false, modalOpen: false };
 
@@ -420,7 +420,7 @@ details summary::-webkit-details-marker{display:none}
       fetch(PLANILHA, { method: 'POST', mode: 'no-cors', body: dados, keepalive: true, credentials: 'omit' })
         .then(fim, fim);
     } catch (e) {}
-    try { var img = new Image(); img.onload = img.onerror = function () {}; img.src = PLANILHA + '?' + dados.toString(); } catch (e) {}
+    try { var img = new Image(); img.crossOrigin = 'anonymous'; img.referrerPolicy = 'no-referrer'; img.onload = img.onerror = function () {}; img.src = PLANILHA + '?' + dados.toString(); } catch (e) {}
   }
 
   document.querySelectorAll('[data-lead-form]').forEach(function (form) {
