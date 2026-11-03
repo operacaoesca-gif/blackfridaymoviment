@@ -409,11 +409,18 @@ details summary::-webkit-details-marker{display:none}
     if (e.key === 'Escape' && estado.modalOpen) { estado.modalOpen = false; aplicar(); }
   });
 
-  function enviar(nome, telefone) {
-    var dados = new URLSearchParams({ nome: nome, telefone: telefone, origem: 'LP Black Friday Sobradinho', pagina: location.href });
-    var ok = false;
-    try { if (navigator.sendBeacon) ok = navigator.sendBeacon(PLANILHA, dados); } catch (e) {}
-    if (!ok) { try { fetch(PLANILHA, { method: 'POST', mode: 'no-cors', body: dados, keepalive: true }); } catch (e) {} }
+  // Envia o lead por dois caminhos (POST e GET) e só redireciona depois do envio
+  // (ou após 2,5 s no máximo). Antes o redirecionamento cortava o envio.
+  function enviar(nome, telefone, depois) {
+    var dados = new URLSearchParams({ nome: nome, telefone: telefone, origem: 'LP Black Friday Sobradinho', pagina: location.href, id: Date.now() + '-' + Math.random().toString(36).slice(2, 8) });
+    var feito = false;
+    function fim() { if (!feito) { feito = true; depois(); } }
+    setTimeout(fim, 2500);
+    try {
+      fetch(PLANILHA, { method: 'POST', mode: 'no-cors', body: dados, keepalive: true, credentials: 'omit' })
+        .then(fim, fim);
+    } catch (e) {}
+    try { var img = new Image(); img.onload = img.onerror = function () {}; img.src = PLANILHA + '?' + dados.toString(); } catch (e) {}
   }
 
   document.querySelectorAll('[data-lead-form]').forEach(function (form) {
@@ -426,8 +433,7 @@ details summary::-webkit-details-marker{display:none}
       erro('');
       document.querySelectorAll('[data-first-name]').forEach(function (el) { el.textContent = nome.split(/\s+/)[0]; });
       estado.sent = true; aplicar();
-      enviar(nome, telefone);
-      setTimeout(function () { window.location.href = WHATSAPP; }, 800);
+      enviar(nome, telefone, function () { window.location.href = WHATSAPP; });
     });
   });
 
