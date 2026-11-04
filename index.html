@@ -85,8 +85,8 @@ details summary::-webkit-details-marker{display:none}
 <div data-if="sent">
 <div style="display: flex; flex-direction: column; gap: 18px; align-items: flex-start">
 <div style="width: 56px; height: 56px; border-radius: 50%; background: #30A646; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0B0B0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></div>
-<h2 style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 26px; line-height: 1.2">Pronto, <span data-first-name></span>! Falta só um passo.</h2>
-<p style="margin: 0; color: #D6D6D6">Sua vaga está reservada. Toque no botão abaixo para entrar no grupo da Black Friday no WhatsApp.</p>
+<h2 style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 26px; line-height: 1.2">Pronto, <span data-first-name></span>! Abrindo o grupo…</h2>
+<p style="margin: 0; color: #D6D6D6">Sua vaga está reservada. Você será levado automaticamente para o grupo da Black Friday no WhatsApp. Se não abrir em alguns segundos, toque no botão abaixo.</p>
 <a href="https://chat.whatsapp.com/LbNjcRe9jwqGFJjbOVrHRQ" target="_top" rel="noopener" class="mv-pulse" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; box-sizing: border-box; min-height: 60px; border-radius: 10px; background: #30A646; color: #0B0B0B; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; text-decoration: none; padding: 0 20px">Entrar no grupo agora</a>
 </div>
 </div>
@@ -411,11 +411,19 @@ details summary::-webkit-details-marker{display:none}
 
   // Envia o lead por dois caminhos (POST e GET) e só redireciona depois do envio
   // (ou após 2,5 s no máximo). Antes o redirecionamento cortava o envio.
+  // Abre o grupo sozinho. Se a página estiver dentro de um iframe (alguns
+  // construtores de site fazem isso), sai do iframe para o WhatsApp abrir.
+  function irParaGrupo() {
+    try { window.top.location.href = WHATSAPP; return; } catch (e) {}
+    try { window.location.href = WHATSAPP; return; } catch (e) {}
+    window.open(WHATSAPP, '_blank');
+  }
+
   function enviar(nome, telefone, depois) {
     var dados = new URLSearchParams({ nome: nome, telefone: telefone, origem: 'LP Black Friday Sobradinho', pagina: location.href, id: Date.now() + '-' + Math.random().toString(36).slice(2, 8) });
     var feito = false;
     function fim() { if (!feito) { feito = true; depois(); } }
-    setTimeout(fim, 2500);
+    setTimeout(fim, 1200);
     try {
       fetch(PLANILHA, { method: 'POST', mode: 'no-cors', body: dados, keepalive: true, credentials: 'omit' })
         .then(fim, fim);
@@ -433,7 +441,7 @@ details summary::-webkit-details-marker{display:none}
       erro('');
       document.querySelectorAll('[data-first-name]').forEach(function (el) { el.textContent = nome.split(/\s+/)[0]; });
       estado.sent = true; aplicar();
-      enviar(nome, telefone, function () { window.location.href = WHATSAPP; });
+      enviar(nome, telefone, irParaGrupo);
     });
   });
 
